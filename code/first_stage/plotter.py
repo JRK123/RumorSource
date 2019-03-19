@@ -38,6 +38,8 @@ sensorNodes = []
 delt = []
 centrality_scores = []
 prob_grph = prob()
+MaxProbOfGraph = prob_grph.index(max(prob_grph))
+colorOfMaxGraph = {}
 nodes_labels = []
 likelihood_of_nodes = {}
 instsance_num = 0 	#this will indicate which istance we are processing in below loop
@@ -54,6 +56,9 @@ for item in files:
 		G.remove_edge(selected_edge[i][0], selected_edge[i][1])
 	
 	dct = community.best_partition(G)
+	if(instsance_num == MaxProbOfGraph):
+		colorOfMaxGraph = dct
+		h = G
 	#print(dct)
 	labels = nx.get_edge_attributes(G,'weight')
 	values = [dct.get(node) for node in G.nodes()]
@@ -133,19 +138,25 @@ for item in files:
 	#----------------------------------------------------------------------------
 	
 #print(sensorNodes)
-print(max(likelihood_of_nodes.iteritems(), key=operator.itemgetter(1))[0])
-print("")
-print("Centrality scores of graph 1:", centrality_scores[0])
-print("")
-print("Centrality scores of graph 2:", centrality_scores[1])
-print("")
-print("Centrality scores of graph 3:", centrality_scores[2])
-print("")
-print("Centrality scores of graph 4:", centrality_scores[3])
-print("")
-print("Probability of each instance:", prob_grph)
-	
-		
+maxSensorNode = max(likelihood_of_nodes.items(), key=operator.itemgetter(1))[0]
+print(maxSensorNode)
+print(prob_grph)
+#MaxProbOfGraph = prob_grph.index(max(prob_grph))
+print(colorOfMaxGraph)
+ColorofMaxSensorNode = colorOfMaxGraph[maxSensorNode]
+print(ColorofMaxSensorNode)
+listOfKeys = [key  for (key, value) in colorOfMaxGraph.items() if value == ColorofMaxSensorNode]
+print(listOfKeys)
+H = h.subgraph(listOfKeys)
+nx.draw_spring(H, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
+plt.show()
+edgesOfCandidateCluster = list(H.edges)
+f = open('secondStageInput.txt', 'w')
+for t in edgesOfCandidateCluster:
+    line = ' '.join(str(x) for x in t)
+    print(line)
+    f.write(line + '\n')
+f.close()		
 		
 		
 		
