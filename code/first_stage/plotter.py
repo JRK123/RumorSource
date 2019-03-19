@@ -158,5 +158,7 @@ for t in edgesOfCandidateCluster:
     f.write(line + '\n')
 f.close()		
 		
-		
+CentralityOfCC, nodeOfCC = mle_cal('secondStageInput.txt')
+source = max(CentralityOfCC.items(), key=operator.itemgetter(1))[0]
+print(source)	
 		
