@@ -6,6 +6,7 @@ import heapq
 from operator import itemgetter
 import glob
 from mle import mle_cal
+import operator
 
 #------------------CALCULATES PROBABILITY OF EACH INSTANCE----------------
 def prob():  
@@ -38,6 +39,8 @@ delt = []
 centrality_scores = []
 prob_grph = prob()
 nodes_labels = []
+likelihood_of_nodes = {}
+instsance_num = 0 	#this will indicate which istance we are processing in below loop
 
 for item in files:
 	
@@ -57,7 +60,7 @@ for item in files:
 
 	nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_color = values, node_size=100, with_labels= True)
 	plt.show()
-	print (G.edges())
+	#print (G.edges())
 
 	fileHandle = open("newgateway.txt","w")
 	adj = [[] for i in range(len(dct)+1)]    #Adjacency list of length (no of nodes + 1)
@@ -65,11 +68,11 @@ for item in files:
 	#-------------------------FINDING THE GATEWAY NODES---------------------------	
 	
 	with open(item) as file: 						# open each instance from directory
-		array1 = file.readlines() 						# read lines from each instance
+		array1 = file.readlines() 					# read lines from each instance
 		for i in range(0,len(array1)): 					# i -> 0 to 78
 			src, dest, wgt = array1[i].split(" ") 			# split source, dest and weight
-			adj[int(src)].append(int(dest))  				# add destination to the index of src 
-			adj[int(dest)].append(int(src))  				# add source to the index at dest
+			adj[int(src)].append(int(dest))  			# add destination to the index of src 
+			adj[int(dest)].append(int(src))  			# add source to the index at dest
 		for j in range(1,len(adj)): 					# j-> 1 to 35 
 			flag = 0 						# set flag to 0
 			for k in range(0,len(adj[j])):				# k -> 0 to no. of neighbours of j
@@ -109,6 +112,17 @@ for item in files:
 	
 	node_centrality_mle_file, nodes_list = mle_cal('newgateway.txt')
 	centrality_scores.append(node_centrality_mle_file)
+	for node in nodes_list :
+		val = node_centrality_mle_file[node] * prob_grph[instsance_num]
+		if node in likelihood_of_nodes :
+			likelihood_of_nodes[node] += val
+		else :
+			likelihood_of_nodes[node] = val
+	instsance_num += 1
+	
+	print("print likelihood of instance is :", instsance_num)		
+	print(likelihood_of_nodes)
+	print("\n\n")
 	
 	#------------------------PLOTTING GATEWAY GRAPHS-----------------------------
 
@@ -118,7 +132,8 @@ for item in files:
 
 	#----------------------------------------------------------------------------
 	
-print(sensorNodes)
+#print(sensorNodes)
+print(max(likelihood_of_nodes.iteritems(), key=operator.itemgetter(1))[0])
 print("")
 print("Centrality scores of graph 1:", centrality_scores[0])
 print("")
@@ -129,16 +144,7 @@ print("")
 print("Centrality scores of graph 4:", centrality_scores[3])
 print("")
 print("Probability of each instance:", prob_grph)
-'''
-print(centrality_scores[0]
-var = 0
-
-
-for i in range(0,19):
-	for j in range(0,3):
-		var += centrality_scores[j][i] * prob_grph[j]
-	print(var)
-'''	
+	
 		
 		
 		
