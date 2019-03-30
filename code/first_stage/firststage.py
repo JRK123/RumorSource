@@ -2,53 +2,114 @@ import community
 import networkx as nx
 import matplotlib.pyplot as plt
 import sys
+import heapq
+from operator import itemgetter
+import glob
+from mle import mle_cal
+import operator
+from instanceProbCal import *
+from findingGateway import *
 
-G = nx.read_edgelist('higgs-retweet_network.txt', nodetype=int,
-  data=(('weight',float),), create_using=nx.Graph())
-dict = community.best_partition(G)
-print(dict)
-labels = nx.get_edge_attributes(G,'weight')
-values = [dict.get(node) for node in G.nodes()]
+#Randomly assigning timestamps to all the 34 nodes
+timestamps = {1: 6.533, 2: 5.422, 3: 0.347, 4: 9.948, 5: 6.051, 6: 2.131, 7: 4.697, 8: 9.287, 9: 9.685, 10: 3.275, 11: 3.919, 12: 1.887, 13: 2.717, 14: 8.284, 15: 4.826, 16: 8.634, 17: 8.075, 18: 3.023, 19: 3.937, 20: 7.450, 21: 7.403, 22: 8.576, 23: 5.567, 24: 8.834, 25: 9.946, 26: 3.674, 27: 9.550, 28: 1.630, 29: 9.053, 30: 0.453, 31: 2.729, 32: 1.461, 33: 5.480, 34: 3.729}
 
-nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_color = values, node_size=100, with_labels= True)
-plt.show()
+files = glob.glob(r'./../Create_Instance/instance[0-9].txt')
+#print(files)
 
-fileHandle = open("newgateway.txt","w")
-adj = [[] for i in range(len(dict)+1)]
-#flag = 0
-#print(adjacency)
-with open('higgs-retweet_network.txt') as file:
-	array1 = file.readlines()
-	#print(array1)
-	for i in range(0,len(array1)):
-		src, dest = array1[i].split(" ")
-		adj[int(src)].append(int(dest))
-		adj[int(dest)].append(int(src))
-	#print(adj)
-	for j in range(1,len(adj)):
-		flag = 0
-		for k in range(0,len(adj[j])):
-			if(dict[j] != dict[adj[j][k]]):
-				flag = 1
-				break;
-		#print(j, flag)
-		if(flag == 0):
-			#print(adj[j])
-			for p in range(0,len(adj[j])):
-				#print(adj[j][p])
-				adj[adj[j][p]].remove(j)
-			adj[j] = []
-	print(adj)
-	for a in range(len(adj)):
-		for b in range(len(adj[a])):
-			fileHandle.write(str(a) + " " + str(adj[a][b]) + "\n") 
-fileHandle.close()
+sensorNodes = []
+centralityScores = []
+probGraph = prob_cal()
+maxProbOfGraph = probGraph.index(max(probGraph))
+colorOfMaxGraph = {}
+nodeLabels = []
+likelihoodOfNodes = {}
+instsanceNum = 0 	#this will indicate which istance we are processing in below loop
+
+for item in files:
 	
-G = nx.read_edgelist('newgateway.txt', nodetype=int,
-  data=(('weight',float),), create_using=nx.Graph())
-b = nx.betweenness_centrality(G)
-print(b)
+	#------------------------CLUSTERING USING LOUVIAN METHOD-----------------------
+	
+	G = nx.read_edgelist(item, nodetype=int, data=(('weight',float),), create_using=nx.Graph())  
+	selected_edge = [(u,v) for u,v,e in G.edges(data=True) if e['weight'] == 1]
+	#print (selected_edge)
 
-labels = nx.get_edge_attributes(G,'weight')
-nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
+	for i in range(len(selected_edge)):
+		G.remove_edge(selected_edge[i][0], selected_edge[i][1])
+	
+	dct = community.best_partition(G)
+	if(instsanceNum == maxProbOfGraph):
+		colorOfMaxGraph = dct
+		maxProbGraph = G				
+	#print(dct)
+	labels = nx.get_edge_attributes(G,'weight')
+	values = [dct.get(node) for node in G.nodes()]
+
+	nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_color = values, node_size=100, with_labels= True)
+	plt.show()
+	#print (G.edges())
+	
+	gatewayProb(item, dct)
+	#------------------------FINDING THE SENSOR NODES-----------------------------
+	
+	#print("\n")
+	G = nx.read_edgelist('newgateway.txt', nodetype=int,
+	  data=(('weight',float),), create_using=nx.Graph())
+	betweennessCentrality = nx.betweenness_centrality(G)
+	#print(betweennessCentrality)
+	topnSensorNodes = heapq.nlargest(8, betweennessCentrality.items(), key=itemgetter(1))
+	topnSensorNodes = dict(topnSensorNodes)
+	#print(topnSensorNodes)
+	sensorNodes.append(topnSensorNodes)
+	sensorNodesArrivalTime = {}
+	#intersect = []
+	for item in timestamps.keys():
+		if item in topnSensorNodes.keys():
+			sensorNodesArrivalTime[item] = timestamps[item]
+	#print(sensorNodesArrivalTime)
+
+	#------------------------CALCULATING MLE---------------------------------
+	
+	cenOfGatewayNodes, nodesList = mle_cal('newgateway.txt')
+	centralityScores.append(cenOfGatewayNodes)
+	for node in nodesList :
+		val = cenOfGatewayNodes[node] * probGraph[instsanceNum]
+		if node in likelihoodOfNodes :
+			likelihoodOfNodes[node] += val
+		else :
+			likelihoodOfNodes[node] = val
+	instsanceNum += 1
+	
+	print("print likelihood of instance is :", instsanceNum)		
+	print(likelihoodOfNodes)
+	print("\n\n")
+	
+	#------------------------PLOTTING GATEWAY GRAPHS-----------------------------
+
+	labels = nx.get_edge_attributes(G,'weight')
+	nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
+	plt.show()
+
+	#----------------------------------------------------------------------------
+	
+#print(sensorNodes)
+maxSensorNode = max(likelihoodOfNodes.items(), key=operator.itemgetter(1))[0]
+print(maxSensorNode)
+print(probGraph)
+#maxProbOfGraph = probGraph.index(max(probGraph))
+print(colorOfMaxGraph)
+colorofMaxSensorNode = colorOfMaxGraph[maxSensorNode]
+print(colorofMaxSensorNode)
+listOfKeys = [key  for (key, value) in colorOfMaxGraph.items() if value == colorofMaxSensorNode]
+print(listOfKeys)
+H = maxProbGraph.subgraph(listOfKeys)
+nx.draw_spring(H, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
 plt.show()
+edgesOfCandidateCluster = list(H.edges())
+f = open('secondStageInput.txt', 'w')
+for t in edgesOfCandidateCluster:
+    line = ' '.join(str(x) for x in t)
+    print(line)
+    f.write(line + '\n')
+f.close()		
+		
+
