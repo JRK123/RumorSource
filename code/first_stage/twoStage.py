@@ -7,27 +7,7 @@ from operator import itemgetter
 import glob
 from mle import mle_cal
 import operator
-
-#------------------CALCULATES PROBABILITY OF EACH INSTANCE----------------
-def prob():  
-	W = [[] for i in range(4)]
-	for i in range(4):
-		with open('./../Create_Instance/instance' + str(i+1) + '.txt') as file:
-			arr = file.readlines()
-			for j in range(0,len(arr)):
-				src, dest, wgt = arr[j].split(" ")
-				W[i].append(float(wgt))
-	
-	prob_graph = []
-	prod = 1
-	for i in range(4):
-		for j in range(0,len(W[i])):
-			prod = prod * W[i][j]
-		prob_graph.append(float(prod))
-	
-	#print(prob_graph)
-	return prob_graph
-
+from instanceProbCal import *
 #Randomly assigning timestamps to all the 34 nodes
 timestamps = {1: 6.533, 2: 5.422, 3: 0.347, 4: 9.948, 5: 6.051, 6: 2.131, 7: 4.697, 8: 9.287, 9: 9.685, 10: 3.275, 11: 3.919, 12: 1.887, 13: 2.717, 14: 8.284, 15: 4.826, 16: 8.634, 17: 8.075, 18: 3.023, 19: 3.937, 20: 7.450, 21: 7.403, 22: 8.576, 23: 5.567, 24: 8.834, 25: 9.946, 26: 3.674, 27: 9.550, 28: 1.630, 29: 9.053, 30: 0.453, 31: 2.729, 32: 1.461, 33: 5.480, 34: 3.729}
 
@@ -35,14 +15,13 @@ files = glob.glob(r'./../Create_Instance/instance[0-9].txt')
 #print(files)
 
 sensorNodes = []
-delt = []
-centrality_scores = []
-prob_grph = prob()
-MaxProbOfGraph = prob_grph.index(max(prob_grph))
+centralityScores = []
+probGraph = prob_cal()
+maxProbOfGraph = probGraph.index(max(probGraph))
 colorOfMaxGraph = {}
-nodes_labels = []
-likelihood_of_nodes = {}
-instsance_num = 0 	#this will indicate which istance we are processing in below loop
+nodeLabels = []
+likelihoodOfNodes = {}
+instsanceNum = 0 	#this will indicate which istance we are processing in below loop
 
 for item in files:
 	
@@ -56,9 +35,9 @@ for item in files:
 		G.remove_edge(selected_edge[i][0], selected_edge[i][1])
 	
 	dct = community.best_partition(G)
-	if(instsance_num == MaxProbOfGraph):
+	if(instsanceNum == maxProbOfGraph):
 		colorOfMaxGraph = dct
-		h = G
+		maxProbGraph = G				
 	#print(dct)
 	labels = nx.get_edge_attributes(G,'weight')
 	values = [dct.get(node) for node in G.nodes()]
@@ -73,9 +52,9 @@ for item in files:
 	#-------------------------FINDING THE GATEWAY NODES---------------------------	
 	
 	with open(item) as file: 						# open each instance from directory
-		array1 = file.readlines() 					# read lines from each instance
-		for i in range(0,len(array1)): 					# i -> 0 to 78
-			src, dest, wgt = array1[i].split(" ") 			# split source, dest and weight
+		array = file.readlines() 					# read lines from each instance
+		for i in range(0,len(array)): 					# i -> 0 to 78
+			src, dest, wgt = array[i].split(" ") 			# split source, dest and weight
 			adj[int(src)].append(int(dest))  			# add destination to the index of src 
 			adj[int(dest)].append(int(src))  			# add source to the index at dest
 		for j in range(1,len(adj)): 					# j-> 1 to 35 
@@ -100,33 +79,33 @@ for item in files:
 	#print("\n")
 	G = nx.read_edgelist('newgateway.txt', nodetype=int,
 	  data=(('weight',float),), create_using=nx.Graph())
-	b = nx.betweenness_centrality(G)
-	#print(b)
-	sensor_nodes = heapq.nlargest(8, b.items(), key=itemgetter(1))
-	sensor_nodes = dict(sensor_nodes)
-	#print(sensor_nodes)
-	sensorNodes.append(sensor_nodes)
-	sensorNodes_arrivalTime = {}
+	betweennessCentrality = nx.betweenness_centrality(G)
+	#print(betweennessCentrality)
+	topnSensorNodes = heapq.nlargest(8, betweennessCentrality.items(), key=itemgetter(1))
+	topnSensorNodes = dict(topnSensorNodes)
+	#print(topnSensorNodes)
+	sensorNodes.append(topnSensorNodes)
+	sensorNodesArrivalTime = {}
 	#intersect = []
 	for item in timestamps.keys():
-		if item in sensor_nodes.keys():
-			sensorNodes_arrivalTime[item] = timestamps[item]
-	#print(sensorNodes_arrivalTime)
+		if item in topnSensorNodes.keys():
+			sensorNodesArrivalTime[item] = timestamps[item]
+	#print(sensorNodesArrivalTime)
 
-	#------------------------CALCULATING DELTA T---------------------------------
+	#------------------------CALCULATING MLE---------------------------------
 	
-	node_centrality_mle_file, nodes_list = mle_cal('newgateway.txt')
-	centrality_scores.append(node_centrality_mle_file)
-	for node in nodes_list :
-		val = node_centrality_mle_file[node] * prob_grph[instsance_num]
-		if node in likelihood_of_nodes :
-			likelihood_of_nodes[node] += val
+	cenOfGatewayNodes, nodesList = mle_cal('newgateway.txt')
+	centralityScores.append(cenOfGatewayNodes)
+	for node in nodesList :
+		val = cenOfGatewayNodes[node] * probGraph[instsanceNum]
+		if node in likelihoodOfNodes :
+			likelihoodOfNodes[node] += val
 		else :
-			likelihood_of_nodes[node] = val
-	instsance_num += 1
+			likelihoodOfNodes[node] = val
+	instsanceNum += 1
 	
-	print("print likelihood of instance is :", instsance_num)		
-	print(likelihood_of_nodes)
+	print("print likelihood of instance is :", instsanceNum)		
+	print(likelihoodOfNodes)
 	print("\n\n")
 	
 	#------------------------PLOTTING GATEWAY GRAPHS-----------------------------
@@ -138,16 +117,16 @@ for item in files:
 	#----------------------------------------------------------------------------
 	
 #print(sensorNodes)
-maxSensorNode = max(likelihood_of_nodes.items(), key=operator.itemgetter(1))[0]
+maxSensorNode = max(likelihoodOfNodes.items(), key=operator.itemgetter(1))[0]
 print(maxSensorNode)
-print(prob_grph)
-#MaxProbOfGraph = prob_grph.index(max(prob_grph))
+print(probGraph)
+#maxProbOfGraph = probGraph.index(max(probGraph))
 print(colorOfMaxGraph)
-ColorofMaxSensorNode = colorOfMaxGraph[maxSensorNode]
-print(ColorofMaxSensorNode)
-listOfKeys = [key  for (key, value) in colorOfMaxGraph.items() if value == ColorofMaxSensorNode]
+colorofMaxSensorNode = colorOfMaxGraph[maxSensorNode]
+print(colorofMaxSensorNode)
+listOfKeys = [key  for (key, value) in colorOfMaxGraph.items() if value == colorofMaxSensorNode]
 print(listOfKeys)
-H = h.subgraph(listOfKeys)
+H = maxProbGraph.subgraph(listOfKeys)
 nx.draw_spring(H, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
 plt.show()
 edgesOfCandidateCluster = list(H.edges())
@@ -160,5 +139,4 @@ f.close()
 		
 CentralityOfCC, nodeOfCC = mle_cal('secondStageInput.txt')
 source = max(CentralityOfCC.items(), key=operator.itemgetter(1))[0]
-print(source)	
-		
+print(source)
