@@ -150,7 +150,7 @@ print(listOfKeys)
 H = h.subgraph(listOfKeys)
 nx.draw_spring(H, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
 plt.show()
-edgesOfCandidateCluster = list(H.edges)
+edgesOfCandidateCluster = list(H.edges())
 f = open('secondStageInput.txt', 'w')
 for t in edgesOfCandidateCluster:
     line = ' '.join(str(x) for x in t)
