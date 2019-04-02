@@ -15,101 +15,101 @@ timestamps = {1: 6.533, 2: 5.422, 3: 0.347, 4: 9.948, 5: 6.051, 6: 2.131, 7: 4.6
 
 files = glob.glob(r'code/Create_Instance/instance[0-9].txt')
 #print(files)
+def firstStage():
+	sensorNodes = []
+	centralityScores = []
+	probGraph = prob_cal()
+	maxProbOfGraph = probGraph.index(max(probGraph))
+	colorOfMaxGraph = {}
+	nodeLabels = []
+	likelihoodOfNodes = {}
+	instsanceNum = 0 	#this will indicate which istance we are processing in below loop
 
-sensorNodes = []
-centralityScores = []
-probGraph = prob_cal()
-maxProbOfGraph = probGraph.index(max(probGraph))
-colorOfMaxGraph = {}
-nodeLabels = []
-likelihoodOfNodes = {}
-instsanceNum = 0 	#this will indicate which istance we are processing in below loop
-
-for item in files:
+	for item in files:
 	
-	#------------------------CLUSTERING USING LOUVIAN METHOD-----------------------
+		#------------------------CLUSTERING USING LOUVIAN METHOD-----------------------
 	
-	G = nx.read_edgelist(item, nodetype=int, data=(('weight',float),), create_using=nx.Graph())  
-	selected_edge = [(u,v) for u,v,e in G.edges(data=True) if e['weight'] == 1]
-	#print (selected_edge)
+		G = nx.read_edgelist(item, nodetype=int, data=(('weight',float),), create_using=nx.Graph())  
+		selected_edge = [(u,v) for u,v,e in G.edges(data=True) if e['weight'] == 1]
+		#print (selected_edge)
 
-	for i in range(len(selected_edge)):
-		G.remove_edge(selected_edge[i][0], selected_edge[i][1])
+		for i in range(len(selected_edge)):
+			G.remove_edge(selected_edge[i][0], selected_edge[i][1])
 	
-	dct = community.best_partition(G)
-	if(instsanceNum == maxProbOfGraph):
-		colorOfMaxGraph = dct
-		maxProbGraph = G				
-	#print(dct)
-	labels = nx.get_edge_attributes(G,'weight')
-	values = [dct.get(node) for node in G.nodes()]
+		dct = community.best_partition(G)
+		if(instsanceNum == maxProbOfGraph):
+			colorOfMaxGraph = dct
+			maxProbGraph = G				
+		#print(dct)
+		labels = nx.get_edge_attributes(G,'weight')
+		values = [dct.get(node) for node in G.nodes()]
 
-	nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_color = values, node_size=100, with_labels= True)
+		nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_color = values, node_size=100, with_labels= True)
+		plt.show()
+		#print (G.edges())
+	
+		gatewayProb(item, dct)
+		#------------------------FINDING THE SENSOR NODES-----------------------------
+	
+		#print("\n")
+		G = nx.read_edgelist('code/BetaStage/newgateway.txt', nodetype=int,
+		  data=(('weight',float),), create_using=nx.Graph())
+		betweennessCentrality = nx.betweenness_centrality(G)
+		#print(betweennessCentrality)
+		topnSensorNodes = heapq.nlargest(8, betweennessCentrality.items(), key=itemgetter(1))
+		topnSensorNodes = dict(topnSensorNodes)
+		#print(topnSensorNodes)
+		sensorNodes.append(topnSensorNodes)
+		sensorNodesArrivalTime = {}
+		#intersect = []
+		for item in timestamps.keys():
+			if item in topnSensorNodes.keys():
+				sensorNodesArrivalTime[item] = timestamps[item]
+		#print(sensorNodesArrivalTime)
+
+		#------------------------CALCULATING MLE---------------------------------
+	
+		cenOfGatewayNodes, nodesList = mle_cal('code/BetaStage/newgateway.txt')
+		centralityScores.append(cenOfGatewayNodes)
+		for node in nodesList :
+			val = cenOfGatewayNodes[node] * probGraph[instsanceNum]
+			if node in likelihoodOfNodes :
+				likelihoodOfNodes[node] += val
+			else :
+				likelihoodOfNodes[node] = val
+		instsanceNum += 1
+	
+		print("print likelihood of instance is :", instsanceNum)		
+		print(likelihoodOfNodes)
+		print("\n\n")
+	
+		#------------------------PLOTTING GATEWAY GRAPHS-----------------------------
+
+		labels = nx.get_edge_attributes(G,'weight')
+		nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
+		plt.show()
+
+		#----------------------------------------------------------------------------
+	
+	#print(sensorNodes)
+	maxSensorNode = max(likelihoodOfNodes.items(), key=operator.itemgetter(1))[0]
+	print(maxSensorNode)
+	print(probGraph)
+	#maxProbOfGraph = probGraph.index(max(probGraph))
+	print(colorOfMaxGraph)
+	colorofMaxSensorNode = colorOfMaxGraph[maxSensorNode]
+	print(colorofMaxSensorNode)
+	listOfKeys = [key  for (key, value) in colorOfMaxGraph.items() if value == colorofMaxSensorNode]
+	print(listOfKeys)
+	H = maxProbGraph.subgraph(listOfKeys)
+	nx.draw_spring(H, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
 	plt.show()
-	#print (G.edges())
-	
-	gatewayProb(item, dct)
-	#------------------------FINDING THE SENSOR NODES-----------------------------
-	
-	#print("\n")
-	G = nx.read_edgelist('code/BetaStage/newgateway.txt', nodetype=int,
-	  data=(('weight',float),), create_using=nx.Graph())
-	betweennessCentrality = nx.betweenness_centrality(G)
-	#print(betweennessCentrality)
-	topnSensorNodes = heapq.nlargest(8, betweennessCentrality.items(), key=itemgetter(1))
-	topnSensorNodes = dict(topnSensorNodes)
-	#print(topnSensorNodes)
-	sensorNodes.append(topnSensorNodes)
-	sensorNodesArrivalTime = {}
-	#intersect = []
-	for item in timestamps.keys():
-		if item in topnSensorNodes.keys():
-			sensorNodesArrivalTime[item] = timestamps[item]
-	#print(sensorNodesArrivalTime)
-
-	#------------------------CALCULATING MLE---------------------------------
-	
-	cenOfGatewayNodes, nodesList = mle_cal('code/BetaStage/newgateway.txt')
-	centralityScores.append(cenOfGatewayNodes)
-	for node in nodesList :
-		val = cenOfGatewayNodes[node] * probGraph[instsanceNum]
-		if node in likelihoodOfNodes :
-			likelihoodOfNodes[node] += val
-		else :
-			likelihoodOfNodes[node] = val
-	instsanceNum += 1
-	
-	print("print likelihood of instance is :", instsanceNum)		
-	print(likelihoodOfNodes)
-	print("\n\n")
-	
-	#------------------------PLOTTING GATEWAY GRAPHS-----------------------------
-
-	labels = nx.get_edge_attributes(G,'weight')
-	nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
-	plt.show()
-
-	#----------------------------------------------------------------------------
-	
-#print(sensorNodes)
-maxSensorNode = max(likelihoodOfNodes.items(), key=operator.itemgetter(1))[0]
-print(maxSensorNode)
-print(probGraph)
-#maxProbOfGraph = probGraph.index(max(probGraph))
-print(colorOfMaxGraph)
-colorofMaxSensorNode = colorOfMaxGraph[maxSensorNode]
-print(colorofMaxSensorNode)
-listOfKeys = [key  for (key, value) in colorOfMaxGraph.items() if value == colorofMaxSensorNode]
-print(listOfKeys)
-H = maxProbGraph.subgraph(listOfKeys)
-nx.draw_spring(H, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
-plt.show()
-edgesOfCandidateCluster = list(H.edges())
-f = open('code/BetaStage/secondStageInput.txt', 'w')
-for t in edgesOfCandidateCluster:
-    line = ' '.join(str(x) for x in t)
-    print(line)
-    f.write(line + '\n')
-f.close()		
+	edgesOfCandidateCluster = list(H.edges())
+	f = open('code/BetaStage/secondStageInput.txt', 'w')
+	for t in edgesOfCandidateCluster:
+	    line = ' '.join(str(x) for x in t)
+	    print(line)
+	    f.write(line + '\n')
+	f.close()		
 		
 
