@@ -2,7 +2,7 @@
 def prob_cal():  
 	W = [[] for i in range(4)]
 	for i in range(4):
-		with open('./../Create_Instance/instance' + str(i+1) + '.txt') as file:
+		with open('code/Create_Instance/instance' + str(i+1) + '.txt') as file:
 			arr = file.readlines()
 			for j in range(0,len(arr)):
 				src, dest, wgt = arr[j].split(" ")

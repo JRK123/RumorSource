@@ -4,7 +4,7 @@ import ndlib.models.epidemics.SIModel as si
 import matplotlib.pyplot as plt
 
 # Network topology
-g = nx.read_edgelist('higgs-retweet_network.txt', nodetype=int,
+g = nx.read_edgelist('code/DiffusionModel/higgs-retweet_network.txt', nodetype=int,
 	  data=(('weight',float),), create_using=nx.Graph())
 # Model selection
 model = si.SIModel(g)
@@ -37,7 +37,7 @@ h = g.subgraph(inf)
 print(len(h))
 
 edgesOfCandidateCluster = list(h.edges())
-f = open('./network.txt', 'w')
+f = open('code/DiffusionModel/network.txt', 'w')
 for t in edgesOfCandidateCluster:
     line = ' '.join(str(x) for x in t)
     #print(line)

@@ -1,5 +1,5 @@
 def gatewayProb(item, dct):
-	fileHandle = open("newgateway.txt","w")
+	fileHandle = open("code/BetaStage/newgateway.txt","w")
 	adj = [[] for i in range(max(dct, key=int)+1)]    #Adjacency list of length (no of nodes + 1)
 	
 	#-------------------------FINDING THE GATEWAY NODES---------------------------	

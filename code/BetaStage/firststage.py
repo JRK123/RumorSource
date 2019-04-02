@@ -13,7 +13,7 @@ from findingGateway import *
 #Randomly assigning timestamps to all the 34 nodes
 timestamps = {1: 6.533, 2: 5.422, 3: 0.347, 4: 9.948, 5: 6.051, 6: 2.131, 7: 4.697, 8: 9.287, 9: 9.685, 10: 3.275, 11: 3.919, 12: 1.887, 13: 2.717, 14: 8.284, 15: 4.826, 16: 8.634, 17: 8.075, 18: 3.023, 19: 3.937, 20: 7.450, 21: 7.403, 22: 8.576, 23: 5.567, 24: 8.834, 25: 9.946, 26: 3.674, 27: 9.550, 28: 1.630, 29: 9.053, 30: 0.453, 31: 2.729, 32: 1.461, 33: 5.480, 34: 3.729}
 
-files = glob.glob(r'./../Create_Instance/instance[0-9].txt')
+files = glob.glob(r'code/Create_Instance/instance[0-9].txt')
 #print(files)
 
 sensorNodes = []
@@ -52,7 +52,7 @@ for item in files:
 	#------------------------FINDING THE SENSOR NODES-----------------------------
 	
 	#print("\n")
-	G = nx.read_edgelist('newgateway.txt', nodetype=int,
+	G = nx.read_edgelist('code/BetaStage/newgateway.txt', nodetype=int,
 	  data=(('weight',float),), create_using=nx.Graph())
 	betweennessCentrality = nx.betweenness_centrality(G)
 	#print(betweennessCentrality)
@@ -69,7 +69,7 @@ for item in files:
 
 	#------------------------CALCULATING MLE---------------------------------
 	
-	cenOfGatewayNodes, nodesList = mle_cal('newgateway.txt')
+	cenOfGatewayNodes, nodesList = mle_cal('code/BetaStage/newgateway.txt')
 	centralityScores.append(cenOfGatewayNodes)
 	for node in nodesList :
 		val = cenOfGatewayNodes[node] * probGraph[instsanceNum]
@@ -105,7 +105,7 @@ H = maxProbGraph.subgraph(listOfKeys)
 nx.draw_spring(H, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
 plt.show()
 edgesOfCandidateCluster = list(H.edges())
-f = open('secondStageInput.txt', 'w')
+f = open('code/BetaStage/secondStageInput.txt', 'w')
 for t in edgesOfCandidateCluster:
     line = ' '.join(str(x) for x in t)
     print(line)
