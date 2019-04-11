@@ -3,14 +3,10 @@ sys.path.append('./code/BetaStage')
 from firststage import *
 from secondStage import *
 
-<<<<<<< Updated upstream
-actualSource, bfs_dict, g = siModel('code/DiffusionModel/higgs-retweet_network')
-=======
 dirName = input("Enter the name of network : ")
 instancePath = "./code/Create_Instance/" + str(dirName)
 filePath = "./code/datasets/" + str(dirName) + ".txt"
 g = nx.read_edgelist(filePath, nodetype=int, data=(('weight',float),), create_using=nx.Graph())
->>>>>>> Stashed changes
 
 
 actualSource = int(firstStage(instancePath))
