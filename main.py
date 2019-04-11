@@ -7,7 +7,7 @@ from edgewt import createInstance
 from firststage import *
 from secondStage import *
 
-actualSource, bfs_dict, g = siModel('code/DiffusionModel/higgs-retweet_network.txt')
+actualSource, bfs_dict, g = siModel('code/DiffusionModel/higgs-retweet_network')
 
 createInstance()
 
