@@ -7,4 +7,4 @@ Various algorithms have been proposed in recent years to estimate rumour source 
    - Python2.7
    - ndlib
    - pandas
-   - networkx module
+   * networkx module
