@@ -1,12 +1,17 @@
 import random
+import os
 
-def createInstance():
+def createInstance(dirName):
+	path = "Create_Instance/" + dirName
+	if not os.path.exists(path):
+    		os.mkdir(path)
 	for j in range(1, 5):
-		fileHandle = open("code/Create_Instance/instance"+str(j)+".txt","w")
-		with open('code/DiffusionModel/InfectedGraph.txt') as file:
+		fileHandle = open(path+"/instance"+str(j)+".txt","w")
+		with open('DiffusionModel/InfectedGraph.txt') as file:
 			array = file.readlines()
-	
-			for i in range(0,len(array)):
+			actualSource = array[0]
+			fileHandle.write(actualSource)
+			for i in range(1,len(array)):
 				src, dst = array[i].split(" ")
 				dst = dst.strip('\n')	
 				wt = str("{0:.2f}".format(random.random()))

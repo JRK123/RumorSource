@@ -1,21 +1,27 @@
 import sys
-sys.path.append('/home/ganesh/Documents/RumorSource/code/DiffusionModel')
-sys.path.append('/home/ganesh/Documents/RumorSource/code/Create_Instance')
-sys.path.append('/home/ganesh/Documents/RumorSource/code/BetaStage')
-from SI import siModel
-from edgewt import createInstance
+sys.path.append('./code/BetaStage')
 from firststage import *
 from secondStage import *
 
+<<<<<<< Updated upstream
 actualSource, bfs_dict, g = siModel('code/DiffusionModel/higgs-retweet_network')
+=======
+dirName = input("Enter the name of network : ")
+instancePath = "./code/Create_Instance/" + str(dirName)
+filePath = "./code/datasets/" + str(dirName) + ".txt"
+g = nx.read_edgelist(filePath, nodetype=int, data=(('weight',float),), create_using=nx.Graph())
+>>>>>>> Stashed changes
 
-createInstance()
 
-firstStage()
+actualSource = int(firstStage(instancePath))
 
 predictedSource = secondStage()
 color_map = []
 
+print(filePath)
+
+bfs_dict = dict(nx.bfs_successors(g, actualSource))
+print ("successor ", bfs_dict)
 print('actualSource = ',actualSource)
 print('predictedSource = ', predictedSource)
 

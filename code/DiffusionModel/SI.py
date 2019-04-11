@@ -33,12 +33,13 @@ def siModel(filename):
 	    	inf.extend(listOfKeys)
 
 	print("infected nodes = ", inf)
-	#print(len(inf))
+	print(len(inf))
 	h = g.subgraph(inf)
-	#print(len(h))
+	print(len(h))
 
 	edgesOfInfectedGraph = list(h.edges())
-	f = open('code/DiffusionModel/InfectedGraph.txt', 'w')
+	f = open('DiffusionModel/InfectedGraph.txt', 'w')
+	f.write(str(inf[0]) + '\n')
 	for t in edgesOfInfectedGraph:
 	    line = ' '.join(str(x) for x in t)
 	    #print(line)
