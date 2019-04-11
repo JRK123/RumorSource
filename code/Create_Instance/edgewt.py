@@ -3,7 +3,7 @@ import random
 def createInstance():
 	for j in range(1, 5):
 		fileHandle = open("code/Create_Instance/instance"+str(j)+".txt","w")
-		with open('code/DiffusionModel/network.txt') as file:
+		with open('code/DiffusionModel/InfectedGraph.txt') as file:
 			array = file.readlines()
 	
 			for i in range(0,len(array)):

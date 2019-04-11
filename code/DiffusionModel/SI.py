@@ -32,14 +32,14 @@ def siModel(filename):
 	    if(listOfKeys != []):
 	    	inf.extend(listOfKeys)
 
-	print(inf)
-	print(len(inf))
+	print("infected nodes = ", inf)
+	#print(len(inf))
 	h = g.subgraph(inf)
-	print(len(h))
+	#print(len(h))
 
-	edgesOfCandidateCluster = list(h.edges())
-	f = open('code/DiffusionModel/network.txt', 'w')
-	for t in edgesOfCandidateCluster:
+	edgesOfInfectedGraph = list(h.edges())
+	f = open('code/DiffusionModel/InfectedGraph.txt', 'w')
+	for t in edgesOfInfectedGraph:
 	    line = ' '.join(str(x) for x in t)
 	    #print(line)
 	    f.write(line + '\n')
