@@ -4,7 +4,7 @@ Various algorithms have been proposed in recent years to estimate rumour source 
 
 ## Prerequisites
 1. Libraries that needs to be installed
-   _ Python2.7
-   _ ndlib
-   _ pandas
-   _ networkx module
+   - Python2.7
+   - ndlib
+   - pandas
+   - networkx module
