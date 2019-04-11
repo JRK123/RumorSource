@@ -6,7 +6,7 @@ def gatewayProb(item, dct):
 	
 	with open(item) as file: 						# open each instance from directory
 		array = file.readlines() 					# read lines from each instance
-		for i in range(0,len(array)): 					# i -> 0 to 78
+		for i in range(1,len(array)): 					# i -> 0 to 78
 			src, dest, wgt = array[i].split(" ") 			# split source, dest and weight
 			adj[int(src)].append(int(dest))  			# add destination to the index of src 
 			adj[int(dest)].append(int(src))  			# add source to the index at dest

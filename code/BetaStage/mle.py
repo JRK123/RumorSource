@@ -57,8 +57,8 @@ def mle_cal(filename) :
 		#print("source = ", source)
 		bfs_dict = dict(nx.bfs_successors(G, source))
 		#print ("successor ", bfs_dict)
-		up_messages_t = [1]*50
-		up_messages_p = [1]*50
+		up_messages_t = [1]*100000
+		up_messages_p = [1]*100000
 		messages_t,messages_p = rumor_centrality(source)
 		messages_t[source] += cal_t(source)
 		messages_p[source] =messages_t[source] * cal_p(source)
