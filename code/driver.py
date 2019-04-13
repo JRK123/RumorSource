@@ -10,7 +10,7 @@ from edgewt import createInstance
 files = glob.glob('./datasets/*.txt')
 
 for filename in files:
-	actualSource, bfs_dict, g = siModel(filename)#, beta, percentage_infected, numOfIterations
+	actualSource, g = siModel(filename)#, beta, percentage_infected, numOfIterations
 	base = os.path.basename(filename)
 	dirName = os.path.splitext(base)[0]
 	createInstance(dirName)

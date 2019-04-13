@@ -46,8 +46,9 @@ def firstStage(filePath):
 		labels = nx.get_edge_attributes(G,'weight')
 		values = [dct.get(node) for node in G.nodes()]
 
-		nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_color = values, node_size=100, with_labels= True)
-		plt.show()
+		if(instsanceNum == 3):
+			nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_color = values, node_size=100, with_labels= True)
+			plt.show()
 		#print (G.edges())
 	
 		gatewayProb(item, dct)
@@ -80,29 +81,28 @@ def firstStage(filePath):
 			else :
 				likelihoodOfNodes[node] = val
 		instsanceNum += 1
-	
-		print("print likelihood of instance is :", instsanceNum)		
-		print(likelihoodOfNodes)
-		print("\n\n")
+		if(instsanceNum == 4):
+			#print("likelihood of nodes is :", likelihoodOfNodes)
+			#print("\n\n")
 	
 		#------------------------PLOTTING GATEWAY GRAPHS-----------------------------
 
-		labels = nx.get_edge_attributes(G,'weight')
-		nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
-		plt.show()
+			labels = nx.get_edge_attributes(G,'weight')
+			nx.draw_spring(G, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
+			plt.show()
 
 		#----------------------------------------------------------------------------
 	
 	#print(sensorNodes)
 	maxSensorNode = max(likelihoodOfNodes.items(), key=operator.itemgetter(1))[0]
-	print(maxSensorNode)
-	print(probGraph)
+	#print(maxSensorNode)
+	print("probabilities of graph : ",probGraph)
 	#maxProbOfGraph = probGraph.index(max(probGraph))
-	print(colorOfMaxGraph)
+	#print(colorOfMaxGraph)
 	colorofMaxSensorNode = colorOfMaxGraph[maxSensorNode]
-	print(colorofMaxSensorNode)
+	#print(colorofMaxSensorNode)
 	listOfKeys = [key  for (key, value) in colorOfMaxGraph.items() if value == colorofMaxSensorNode]
-	print(listOfKeys)
+	#print(listOfKeys)
 	H = maxProbGraph.subgraph(listOfKeys)
 	nx.draw_spring(H, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
 	plt.show()
@@ -110,7 +110,7 @@ def firstStage(filePath):
 	f = open('code/BetaStage/secondStageInput.txt', 'w')
 	for t in edgesOfCandidateCluster:
 	    line = ' '.join(str(x) for x in t)
-	    print(line)
+	    #print(line)
 	    f.write(line + '\n')
 	f.close()		
 	

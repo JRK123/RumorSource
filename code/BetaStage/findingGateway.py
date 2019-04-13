@@ -10,7 +10,7 @@ def gatewayProb(item, dct):
 			src, dest, wgt = array[i].split(" ") 			# split source, dest and weight
 			adj[int(src)].append(int(dest))  			# add destination to the index of src 
 			adj[int(dest)].append(int(src))  			# add source to the index at dest
-		for j in range(1,len(adj)): 					# j-> 1 to 35 
+		for j in range(1,len(adj)): 					# j-> 1 to length of adj 
 			flag = 0 						# set flag to 0
 			for k in range(0,len(adj[j])):				# k -> 0 to no. of neighbours of j
 				if(dct[j] != dct[adj[j][k]]):			# if colour of j is not equal to colour of any of its neighbour		

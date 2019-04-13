@@ -8,21 +8,20 @@ instancePath = "./code/Create_Instance/" + str(dirName)
 filePath = "./code/datasets/" + str(dirName) + ".txt"
 g = nx.read_edgelist(filePath, nodetype=int, data=(('weight',float),), create_using=nx.Graph())
 
-
 actualSource = int(firstStage(instancePath))
 
 predictedSource = secondStage()
 color_map = []
 
-print(filePath)
+#print(filePath)
 
 bfs_dict = dict(nx.bfs_successors(g, actualSource))
-print ("successor ", bfs_dict)
+#print ("successor ", bfs_dict)
 print('actualSource = ',actualSource)
 print('predictedSource = ', predictedSource)
 
 neighbours = bfs_dict[actualSource]
-print('neighbours = ', neighbours)
+#print('neighbours = ', neighbours)
 
 nodeList = []
 flag = 0

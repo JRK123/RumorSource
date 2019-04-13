@@ -19,23 +19,26 @@ def siModel(filename):
 	inf=[]
 
 	# Simulation execution
-	iterations = model.iteration_bunch(10)
+	iterations = model.iteration_bunch(4)
 
 	for i in iterations:
 	    iter_ind=i['iteration']
 	    #c=i['node_count']
 	    node_status_list=i['status']
-	    print("Iteration:",iter_ind)
+	    #print("Iteration:",iter_ind)
 	    #print(node_status_list)
 	    listOfKeys = [key  for (key, value) in node_status_list.items() if value == 1]
-	    print(listOfKeys)
+	    #print(listOfKeys)
 	    if(listOfKeys != []):
 	    	inf.extend(listOfKeys)
 
-	print("infected nodes = ", inf)
-	print(len(inf))
+	#print("infected nodes = ", inf)
+	print("total nodes", len(g))
+	print("infected nodes", len(inf))
+	if(len(inf) > 5000):
+		sys.exit()
 	h = g.subgraph(inf)
-	print(len(h))
+	#print(len(h))
 
 	edgesOfInfectedGraph = list(h.edges())
 	f = open('DiffusionModel/InfectedGraph.txt', 'w')
@@ -46,11 +49,8 @@ def siModel(filename):
 	    f.write(line + '\n')
 	f.close()
 
-	bfs_dict = dict(nx.bfs_successors(h, inf[0]))
-	print ("successor ", bfs_dict)
-
-	nx.draw_spring(h, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
-	plt.show()
+	#nx.draw_spring(h, cmap = plt.get_cmap('jet'), node_size=100, with_labels= True)
+	#plt.show()
 	
-	return inf[0], bfs_dict, h
+	return inf[0], h
 
